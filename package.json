@@ -18,6 +18,9 @@
       "require": "./build/lib.cjs"
     }
   },
+  "files": [
+    "build"
+  ],
   "scripts": {
     "build": "rollup -c",
     "build:mac": "npm run build && caxa --input . --output dist/mac/arm64/incback --exclude dist --exclude src --exclude test --exclude .git -- \"{{caxa}}/node_modules/.bin/node\" \"{{caxa}}/build/cli.mjs\"",
