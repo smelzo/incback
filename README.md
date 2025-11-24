@@ -20,6 +20,14 @@ A space-efficient incremental backup tool using rsync with hard-link support. Su
 npm install -g incback
 ```
 
+### Quick Install (Linux & macOS)
+
+You can install the standalone binary directly using curl:
+
+```bash
+curl -o- https://raw.githubusercontent.com/smelzo/incback/main/install.sh | sudo bash
+```
+
 Or run locally:
 
 ```bash

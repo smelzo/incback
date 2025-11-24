@@ -2,6 +2,10 @@
   "name": "incback",
   "version": "1.0.0",
   "description": "Node.js CLI tool & Lib for incremental backups using rsync with hard-linking",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/smelzo/incback.git"
+  },
   "main": "build/lib.cjs",
   "module": "build/lib.mjs",
   "bin": {

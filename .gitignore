@@ -11,3 +11,4 @@ test/
 package-lock.json
 incback.json
 .incback
+push.sh
