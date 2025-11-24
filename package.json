@@ -1,0 +1,71 @@
+{
+  "name": "incback",
+  "version": "1.0.0",
+  "description": "Node.js CLI tool & Lib for incremental backups using rsync with hard-linking",
+  "main": "build/lib.cjs",
+  "module": "build/lib.mjs",
+  "bin": {
+    "incback": "build/cli.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./build/types/lib.d.ts",
+      "import": "./build/lib.mjs",
+      "require": "./build/lib.cjs"
+    }
+  },
+  "scripts": {
+    "build": "rollup -c",
+    "build:mac": "npm run build && caxa --input . --output dist/mac/arm64/incback --exclude dist --exclude src --exclude test --exclude .git -- \"{{caxa}}/node_modules/.bin/node\" \"{{caxa}}/build/cli.mjs\"",
+    "build:linux:internal": "npm run build && caxa --input . --output dist/linux/x64/incback --exclude dist --exclude src --exclude test --exclude .git -- \"{{caxa}}/node_modules/.bin/node\" \"{{caxa}}/build/cli.mjs\"",
+    "build:linux": "docker build -t incback-linux -f docker-linux/Dockerfile . && docker run --rm -v \"$(pwd)/dist:/app/dist\" incback-linux",
+    "test:bin:linux": "docker build -t incback-test-bin docker-bin && docker run --rm -v \"$(pwd)/dist/linux/x64/incback:/app/incback\" -v \"$(pwd)/test:/data/source\" -v \"/tmp/backup:/data/dest\" incback-test-bin /app/incback -s /data/source -d /data/dest",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist build",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "test": "npm run test:cli-cjs && npm run test:lib-cjs && npm run test:cli-esm && npm run test:lib-esm && npm run test:ts",
+    "test:cli-cjs": "cd test/test-cjs-cli && ./test.sh && cd -",
+    "test:lib-cjs": "cd test/test-cjs-lib && ./test.sh && cd -",
+    "test:cli-esm": "cd test/test-esm-cli && ./test.sh && cd -",
+    "test:lib-esm": "cd test/test-esm-lib && ./test.sh && cd -"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "freebsd",
+    "openbsd"
+  ],
+  "keywords": [
+    "backup",
+    "incremental",
+    "cli",
+    "rsync",
+    "ssh"
+  ],
+  "author": "Francesco Smelzo <francesco@smelzo.it>",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@rollup/plugin-alias": "^6.0.0",
+    "@rollup/plugin-commonjs": "^28.0.9",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^12.3.0",
+    "@types/node": "^24.10.1",
+    "caxa": "^3.0.1",
+    "eslint": "^9.39.1",
+    "rollup": "^4.52.5",
+    "tslib": "^2.8.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.47.0"
+  },
+  "dependencies": {
+    "commander": "^14.0.2"
+  }
+}

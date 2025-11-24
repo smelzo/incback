@@ -1,0 +1,12 @@
+node_modules
+dist
+build
+*.log
+.git
+.gitignore
+.DS_Store
+test
+*.md
+!README.md
+.env
+.incback

@@ -1,0 +1,19 @@
+services:
+  incback:
+    build: .
+    volumes:
+      # 1. SOURCE: Map the local folder to backup to /source
+      - "/local/src/path:/source:ro"
+
+      # 2. SSH: Map the host SSH keys to allow remote connections
+      #    Required when using the -H (host) and -U (user) options
+      - "${HOME}/.ssh:/root/.ssh:ro"
+
+      # 3. DESTINATION:
+      #    - If backup is LOCAL: you should map a volume (e.g. /tmp/backup:/dest)
+      #    - If backup is REMOTE: no mapping needed, rsync will write via SSH
+
+    # Command for REMOTE backup
+    # Replace 'remote_host' and 'remote_user' with your data.
+    # Note: /dest/path/remoto is the path on the remote server, not in the container.
+    command: ["-s", "/source", "-d", "/dest/path/remoto", "-H", "remote_host", "-U", "remote_user", "-R", "dest"]

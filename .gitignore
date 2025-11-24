@@ -1,0 +1,13 @@
+CLAUDE.md
+git-guide.md
+.DS_Store
+node_modules
+test/
+.env
+.vscode
+.claude
+*.log
+*.tsbuildinfo
+package-lock.json
+incback.json
+.incback

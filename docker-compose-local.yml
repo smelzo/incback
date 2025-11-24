@@ -1,0 +1,11 @@
+services:
+  incback:
+    build: .
+    volumes:
+      # Map the source folder to /source in the container (ro = read-only for security)
+      - "/local/src/path:/source:ro"
+      # Map the backup folder to /dest in the container
+      - "/tmp/backup:/dest"
+    # Optional: if you want to see what happens
+    environment:
+      - DEBUG=true
