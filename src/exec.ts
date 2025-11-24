@@ -5,11 +5,8 @@
  * on remote servers via SSH.
  */
 
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { spawn } from 'child_process';
 import type { ProgramOptions } from './types.js';
-
-const execAsync = promisify(exec);
 
 /**
  * Executes a local shell command and returns its output (stdout).
@@ -18,19 +15,38 @@ const execAsync = promisify(exec);
  * @returns A Promise that resolves with the command's output (trimmed)
  * @throws Error if the command fails or produces stderr output
  */
-export async function executeCommand(command: string): Promise<string> {
-    try {
-        const { stdout, stderr } = await execAsync(command);
-        if (stderr) {
-            throw new Error(`Error executing command "${command}": ${stderr}`);
-        }
-        return stdout.trim();
-    } catch (error) {
-        if (error instanceof Error) {
-            throw new Error(`Error executing command "${command}": ${error.message}`);
-        }
-        throw new Error(`Unknown error executing command "${command}"`);
-    }
+export function executeCommand(command: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        // Use spawn with shell: true to execute the command string
+        // This avoids the maxBuffer limit of exec()
+        const child = spawn(command, { shell: true });
+        
+        let stdout = '';
+        let stderr = '';
+
+        child.stdout.on('data', (data) => {
+            stdout += data.toString();
+        });
+
+        child.stderr.on('data', (data) => {
+            stderr += data.toString();
+        });
+
+        child.on('error', (error) => {
+            reject(new Error(`Error executing command "${command}": ${error.message}`));
+        });
+
+        child.on('close', (code) => {
+            if (code !== 0) {
+                reject(new Error(`Error executing command "${command}": ${stderr || `Process exited with code ${code}`}`));
+            } else if (stderr) {
+                // Maintain original behavior: fail if there is any stderr output
+                reject(new Error(`Error executing command "${command}": ${stderr}`));
+            } else {
+                resolve(stdout.trim());
+            }
+        });
+    });
 }
 
 /**
