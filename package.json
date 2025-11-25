@@ -1,6 +1,6 @@
 {
   "name": "incback",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Node.js CLI tool & Lib for incremental backups using rsync with hard-linking",
   "repository": {
     "type": "git",
