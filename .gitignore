@@ -12,4 +12,5 @@ package-lock.json
 incback.json
 .incback
 push.sh
+patch.sh
 build/
