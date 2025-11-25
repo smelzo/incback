@@ -117,6 +117,7 @@ incback -c /path/to/custom-config.json
 | `--exclude-from <file>` | `-e` | Path to file containing exclude patterns (one per line) |
 | `--log-file <file>` | `-l` | Path to log file for backup operations |
 | `--backup-prefix <prefix>` | `-p` | Custom prefix for backup directories (default: `BACKUP-`) |
+| `--rsync-options <options>` | `-o` | Rsync flags to use for the backup.  only flags admitted by incback are "a" "z" and "c" (default: `az`) |
 
 ## How It Works
 
@@ -183,63 +184,6 @@ For remote backups, ensure:
    - `BatchMode=yes` - No password prompts
    - `ConnectTimeout=5` - 5-second connection timeout
 
-## Development
-
-### Build
-
-```bash
-npm run build
-```
-
-### Run Without Building
-
-```bash
-npx tsx src/index.ts
-```
-
-### Test Individual Modules
-
-Some modules include self-test code:
-
-```bash
-# Test remote path existence checker
-npx tsx src/remote-exists.ts
-
-# Test remote command execution
-npx tsx src/exec.ts
-```
-
-Note: Update the hardcoded test hosts/paths in these files before running.
-
-### Clean
-
-```bash
-npm run clean-src
-```
-
-## Project Structure
-
-```
-incback/
-├── src/
-│   ├── index.ts          # Entry point (deprecated, use cli.ts)
-│   ├── cli.ts            # CLI entry point
-│   ├── backup.ts         # Main backup logic
-│   ├── config.ts         # Configuration management
-│   ├── exec.ts           # Command execution utilities
-│   ├── remote-exists.ts  # Remote path existence checker
-│   ├── logger.ts         # Logging utility (console + file)
-│   ├── lib.ts            # Shared library functions
-│   ├── types.ts          # TypeScript type definitions
-│   └── type-guards.ts    # Runtime type validation
-├── build/                # Build output
-├── test/                 # Test files
-├── Dockerfile            # Docker image configuration
-├── docker-compose-*.yml  # Docker compose examples
-├── package.json
-├── tsconfig.json
-└── CLAUDE.md            # Development guide for AI assistants
-```
 
 ## Use Cases
 
@@ -312,6 +256,7 @@ incback \
   --exclude-from ./exclude.txt \
   --log-file ./backup.log \
   --backup-prefix "WEB-"
+  --rsync-options "az"
 ```
 
 **Combined example:**
@@ -325,7 +270,8 @@ incback \
   "backupPrefix": "WEB-",
   "remoteRole": "dest",
   "remoteUser": "backup",
-  "remoteHost": "backup-server.com"
+  "remoteHost": "backup-server.com",
+  "rsyncOptions": "az"
 }
 ```
 
@@ -461,12 +407,9 @@ When using `remoteRole`, both `remoteUser` and `remoteHost` must be specified.
 
 ## License
 
-ISC
+MIT
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Author
-
-Created with ❤️ for efficient, space-saving backups

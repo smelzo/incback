@@ -1,6 +1,6 @@
 {
   "name": "incback",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Node.js CLI tool & Lib for incremental backups using rsync with hard-linking",
   "repository": {
     "type": "git",
@@ -27,6 +27,7 @@
     "build:linux:internal": "npm run build && caxa --input . --output dist/linux/x64/incback --exclude dist --exclude src --exclude test --exclude .git -- \"{{caxa}}/node_modules/.bin/node\" \"{{caxa}}/build/cli.mjs\"",
     "build:linux": "docker build --platform linux/amd64 -t incback-linux -f docker-linux/Dockerfile . && docker run --platform linux/amd64 --rm -v \"$(pwd)/dist:/app/dist\" incback-linux",
     "test:bin:linux": "docker build -t incback-test-bin docker-bin && docker run --rm -v \"$(pwd)/dist/linux/x64/incback:/app/incback\" -v \"$(pwd)/test:/data/source\" -v \"/tmp/backup:/data/dest\" incback-test-bin /app/incback -s /data/source -d /data/dest",
+    "build:complete": "npm run build && npm run build:mac && npm run build:linux",
     "typecheck": "tsc --noEmit",
     "clean": "rm -rf dist build",
     "lint": "eslint src",

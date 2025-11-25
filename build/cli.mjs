@@ -226,12 +226,23 @@ function optionsToConfig(config) {
             config.excludeFrom = excludeFrom;
         }
     }
+    let rsyncOptions = "a";
+    if (config.rsyncOptions) {
+        const configRsyncOptions = config.rsyncOptions.toLowerCase();
+        if (configRsyncOptions.includes("z")) {
+            rsyncOptions += "z";
+        }
+        if (configRsyncOptions.includes("c")) {
+            rsyncOptions += "c";
+        }
+    }
     const backupPrefix = config.backupPrefix ?? 'BACKUP-';
     return {
         ...config,
         isRemoteSrc,
         isRemoteDest,
         backupPrefix,
+        rsyncOptions,
         logger
     };
 }
@@ -285,6 +296,10 @@ function readConfigFromJSON(configFilePath = "") {
  * - -U, --remote-user <user>: Remote user for SSH
  * - -H, --remote-host <host>: Remote host for SSH
  * - -e, --exclude-from <file>: Path to exclude patterns file
+ * - -l, --log-file <file>: Path to log file
+ * - -p, --backup-prefix <prefix>: Prefix for backup directories (default: BACKUP-)
+ * - -o, --rsync-options <options>: Rsync options to use for the backup (default: az)
+ *
  *
  * Priority: If --config is provided, other options are ignored and config is loaded from file.
  *
@@ -305,7 +320,9 @@ function parseConfigFromArgs() {
         .option('-U, --remote-user <user>', 'remote user')
         .option('-H, --remote-host <host>', 'remote host')
         .option('-e, --exclude-from <file>', 'path to exclude patterns file')
-        .option('-l, --log-file <file>', 'path to log file');
+        .option('-l, --log-file <file>', 'path to log file')
+        .option('-p, --backup-prefix <prefix>', 'prefix for backup directories (default: BACKUP-)')
+        .option('-o, --rsync-options <options>', 'rsync options to use for the backup (default: az)');
     program.parse(process.argv);
     const options = program.opts();
     // First check if --config option was provided
@@ -417,7 +434,7 @@ async function remoteExists(remoteUser, remoteHost, remotePath) {
  *   to the previous backup, saving disk space
  *
  * rsync command structure for incremental backups:
- * rsync -av --delete \
+ * rsync -az --delete \
  *   --link-dest={remote}[dest]/[previous-backup]/ \
  *   {remote}[src]/ {remote}[dest]/[current-backup]/
  *
@@ -593,7 +610,7 @@ async function backup(programConfig) {
     }
     // Step 2: Get the most recent backup directory in destination
     const latestBackupDir = await getLatestBackupDir();
-    let rsyncCmd = `rsync -av --delete `;
+    let rsyncCmd = `rsync -${config.rsyncOptions ?? 'az'} --delete `;
     // Include exclude-from option if specified
     if (programConfig.excludeFrom) {
         rsyncCmd += ` --exclude-from="${programConfig.excludeFrom}" `;
@@ -601,14 +618,14 @@ async function backup(programConfig) {
     if (!latestBackupDir) {
         // Initial backup: full copy without hard-linking
         logger.log(`Initial backup to ${getDestPath()}/${path.basename(currentBackupDirname)}`);
-        // rsync -av --delete \
+        // rsync -az --delete \
         //   {remote}[src]/ {remote}[dest]/[current-backup]/
         rsyncCmd += ` "${getSrcPath()}/" "${getDestPath()}/${path.basename(currentBackupDirname)}/"`;
     }
     else {
         // Step 3: Build rsync command with --link-dest for incremental backup
         logger.log(`Incremental backup to ${getDestPath()}/${path.basename(currentBackupDirname)} with link-dest to ${programConfig.dest}/${path.basename(latestBackupDir)}`);
-        // rsync -av --delete \
+        // rsync -az --delete \
         //   --link-dest={remote}[dest]/[previous-backup]/ \
         //   {remote}[src]/ {remote}[dest]/[current-backup]/
         rsyncCmd += ` --link-dest="../${path.basename(latestBackupDir)}/" `;

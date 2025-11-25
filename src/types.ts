@@ -58,7 +58,15 @@ export interface ProgramOptions {
      * CLI flag: -p | --backup-prefix <prefix>
      */
     backupPrefix?: string, 
+    /**
+     * Rsync flags to use for the backup.
+     * only flags admitted by incback are "a" "z" and "c" and default is "az"
+     * CLI flag: -o | --rsync-options <options>
+     */
+    rsyncOptions?: string,
 }
+
+
 
 /**
  * Internal configuration object with computed boolean flags.

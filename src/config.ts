@@ -47,12 +47,23 @@ function optionsToConfig(config: ProgramOptions): ProgramConfig {
             config.excludeFrom = excludeFrom;
         }
     }
+    let rsyncOptions = "a";
+    if (config.rsyncOptions) {
+        const  configRsyncOptions = config.rsyncOptions.toLowerCase();
+        if (configRsyncOptions.includes("z")) {
+            rsyncOptions += "z";
+        }
+        if (configRsyncOptions.includes("c")) {
+            rsyncOptions += "c";
+        }
+    }
     const backupPrefix = config.backupPrefix ?? 'BACKUP-'
     return {
         ...config,
         isRemoteSrc,
         isRemoteDest,
         backupPrefix,
+        rsyncOptions,
         logger
     };
 }
@@ -108,6 +119,10 @@ function readConfigFromJSON(configFilePath = ""): ProgramConfig {
  * - -U, --remote-user <user>: Remote user for SSH
  * - -H, --remote-host <host>: Remote host for SSH
  * - -e, --exclude-from <file>: Path to exclude patterns file
+ * - -l, --log-file <file>: Path to log file
+ * - -p, --backup-prefix <prefix>: Prefix for backup directories (default: BACKUP-)
+ * - -o, --rsync-options <options>: Rsync options to use for the backup (default: az)
+ * 
  *
  * Priority: If --config is provided, other options are ignored and config is loaded from file.
  *
@@ -129,7 +144,9 @@ function parseConfigFromArgs(): ProgramConfig | null {
         .option('-U, --remote-user <user>', 'remote user')
         .option('-H, --remote-host <host>', 'remote host')
         .option('-e, --exclude-from <file>', 'path to exclude patterns file')
-        .option('-l, --log-file <file>', 'path to log file');
+        .option('-l, --log-file <file>', 'path to log file')
+        .option('-p, --backup-prefix <prefix>', 'prefix for backup directories (default: BACKUP-)')
+        .option('-o, --rsync-options <options>', 'rsync options to use for the backup (default: az)');
 
     program.parse(process.argv);
     const options = program.opts();

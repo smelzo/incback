@@ -10,7 +10,7 @@
  *   to the previous backup, saving disk space
  *
  * rsync command structure for incremental backups:
- * rsync -av --delete \
+ * rsync -az --delete \
  *   --link-dest={remote}[dest]/[previous-backup]/ \
  *   {remote}[src]/ {remote}[dest]/[current-backup]/
  *

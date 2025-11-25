@@ -10,7 +10,7 @@
  *   to the previous backup, saving disk space
  *
  * rsync command structure for incremental backups:
- * rsync -av --delete \
+ * rsync -az --delete \
  *   --link-dest={remote}[dest]/[previous-backup]/ \
  *   {remote}[src]/ {remote}[dest]/[current-backup]/
  *
@@ -198,7 +198,7 @@ export async function backup(programConfig:ProgramConfig): Promise<void> {
 
     // Step 2: Get the most recent backup directory in destination
     const latestBackupDir = await getLatestBackupDir();
-    let rsyncCmd = `rsync -av --delete `;
+    let rsyncCmd = `rsync -${config.rsyncOptions??'az'} --delete `;
     // Include exclude-from option if specified
     if (programConfig.excludeFrom) {
         rsyncCmd += ` --exclude-from="${programConfig.excludeFrom}" `;
@@ -206,13 +206,13 @@ export async function backup(programConfig:ProgramConfig): Promise<void> {
     if (!latestBackupDir) {
         // Initial backup: full copy without hard-linking
         logger.log(`Initial backup to ${getDestPath()}/${path.basename(currentBackupDirname)}`);
-        // rsync -av --delete \
+        // rsync -az --delete \
         //   {remote}[src]/ {remote}[dest]/[current-backup]/
         rsyncCmd += ` "${getSrcPath()}/" "${getDestPath()}/${path.basename(currentBackupDirname)}/"`;
     } else {
         // Step 3: Build rsync command with --link-dest for incremental backup
         logger.log(`Incremental backup to ${getDestPath()}/${path.basename(currentBackupDirname)} with link-dest to ${programConfig.dest}/${path.basename(latestBackupDir)}`);
-        // rsync -av --delete \
+        // rsync -az --delete \
         //   --link-dest={remote}[dest]/[previous-backup]/ \
         //   {remote}[src]/ {remote}[dest]/[current-backup]/
         rsyncCmd += ` --link-dest="../${path.basename(latestBackupDir)}/" `;
